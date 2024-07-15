@@ -1,47 +1,78 @@
-import { Character, Bowman, Swordsman, Magician, Daemon, Undead, Zombie } from '../character';
+import Character from '../class/character';
 
-test('Создание персонажа с некорректным именем', () => {
-    expect(() => new Character('A', 'Bowman')).toThrow('Имя должно быть строкой от 2 до 10 символов');
-    expect(() => new Character('ОченьДлинноеИмя', 'Bowman')).toThrow('Имя должно быть строкой от 2 до 10 символов');
+test('правильно создается объект', () => {
+  const character = new Character('character', 'Bowman');
+  const correct = {
+    name: 'character',
+    type: 'Bowman',
+    health: 100,
+    level: 1,
+    attack: null,
+    defence: null,
+  };
+  expect(character).toEqual(correct);
 });
 
-test('Создание персонажа с некорректным типом', () => {
-    expect(() => new Character('Robin', 'Archer')).toThrow('Некорректный тип персонажа');
+test('Ошибка при некорректном имени (меньше 2 символов)', () => {
+  expect(() => new Character('a', 'Bowman')).toThrow('Имя должно быть строкой от 2 до 10 символов');
 });
 
-test('Создание персонажа Bowman', () => {
-    const bowman = new Bowman('Robin');
-    expect(bowman.name).toBe('Robin');
-    expect(bowman.type).toBe('Bowman');
-    expect(bowman.health).toBe(100);
-    expect(bowman.level).toBe(1);
-    expect(bowman.attack).toBe(25);
-    expect(bowman.defence).toBe(25);
+test('Ошибка при некорректном имени (больше 10 символов)', () => {
+  expect(() => new Character('longcharactername', 'Bowman')).toThrow('Имя должно быть строкой от 2 до 10 символов');
 });
 
-test('Метод levelUp', () => {
-    const swordsman = new Swordsman('Arthur');
-    swordsman.levelUp();
-    expect(swordsman.level).toBe(2);
-    expect(swordsman.attack).toBe(48); // 40 * 1.2
-    expect(swordsman.defence).toBe(12); // 10 * 1.2
-    expect(swordsman.health).toBe(100);
+test('Ошибка при некорректном типе', () => {
+  expect(() => new Character('character', 'InvalidType')).toThrow('Некорректный тип персонажа');
 });
 
-test('Метод levelUp для мертвого персонажа', () => {
-    const magician = new Magician('Merlin');
-    magician.health = 0;
-    expect(() => magician.levelUp()).toThrow('Нельзя повысить левел умершего');
+test('levelUp повышает уровень, атаку, защиту и здоровье', () => {
+  const character = new Character('character', 'Bowman');
+  character.attack = 10;
+  character.defence = 10;
+  character.levelUp();
+  const expected = {
+    name: 'character',
+    type: 'Bowman',
+    health: 100,
+    level: 2,
+    attack: 12,
+    defence: 12,
+  };
+  expect(character).toEqual(expected);
 });
 
-test('Метод damage', () => {
-    const daemon = new Daemon('Azazel');
-    daemon.damage(50);
-    expect(daemon.health).toBeCloseTo(70); // 100 - 50 * (1 - 40 / 100)
+test('levelUp выбрасывает ошибку, если здоровье равно 0', () => {
+  const character = new Character('character', 'Bowman');
+  character.health = 0;
+  expect(() => character.levelUp()).toThrow('Нельзя повысить левел умершего');
 });
 
-test('Метод damage с отрицательным здоровьем', () => {
-    const undead = new Undead('Zombie');
-    undead.damage(200);
-    expect(undead.health).toBe(0);
+test('damage уменьшает здоровье персонажа', () => {
+  const character = new Character('character', 'Bowman');
+  character.defence = 50;
+  character.damage(20);
+  const expected = {
+    name: 'character',
+    type: 'Bowman',
+    health: 90,
+    level: 1,
+    attack: null,
+    defence: 50,
+  };
+  expect(character).toEqual(expected);
+});
+
+test('damage не уменьшает здоровье ниже 0', () => {
+  const character = new Character('character', 'Bowman');
+  character.defence = 0;
+  character.damage(200);
+  const expected = {
+    name: 'character',
+    type: 'Bowman',
+    health: 0,
+    level: 1,
+    attack: null,
+    defence: 0,
+  };
+  expect(character).toEqual(expected);
 });
